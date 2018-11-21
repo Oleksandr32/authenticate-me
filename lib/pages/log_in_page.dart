@@ -68,7 +68,7 @@ class _LogInPageState extends State<LogInPage> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text("Log In")),
+      appBar: AppBar(title: Text("Log in")),
         body: Center(
           child: ListView(
             shrinkWrap: true,
