@@ -4,7 +4,7 @@ class User {
   String _email;
   String _password;
 
-  User(this._id, this._username, this._email, this._password);
+  User(this._username, this._email, this._password);
 
   int get id => _id;
   String get username => _username;
@@ -20,7 +20,9 @@ class User {
 
   Map<String, dynamic> toMap() {
     var map = Map<String, dynamic>();
-    map['id'] = _id;
+    if (_id != null) {
+      map['id'] = _id;
+    }
     map['username'] = _username;
     map['email'] = _email;
     map['password'] = _password;
