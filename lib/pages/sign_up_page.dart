@@ -11,6 +11,13 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+      _passwordController.dispose();
+      super.dispose();
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +28,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
     final userName = TextFormField(
       autofocus: false,
+      validator: (value) {
+        if (value.isEmpty) return 'Username is required.';
+      },
       decoration: InputDecoration(
         hintText: "User Name",
         contentPadding: EdgeInsets.all(16.0),
@@ -31,6 +41,16 @@ class _SignUpPageState extends State<SignUpPage> {
   final email = TextFormField(
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Email is required.';
+        }
+
+        RegExp regex = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+        if (!regex.hasMatch(value)) {
+          return 'Incorrect email. Please try again.';
+        }
+      },
       decoration: InputDecoration(
         hintText: "Email",
         contentPadding: EdgeInsets.all(16.0),
@@ -47,6 +67,14 @@ class _SignUpPageState extends State<SignUpPage> {
         contentPadding: EdgeInsets.all(16.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
+      controller: _passwordController,
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Password is required.';
+        } else if (value.length < 8) {
+          return 'Password should contains more 7 symbols.';
+        }
+      },
     );
 
     final confirmPassword = TextFormField(
@@ -58,6 +86,13 @@ class _SignUpPageState extends State<SignUpPage> {
         contentPadding: EdgeInsets.all(16.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
+      validator: (value) {
+        if (value.isEmpty) {
+          return 'Confirm password is required.';
+        } else if (value != _passwordController.text) {
+          return 'Confirm password not equals password.';
+        }
+      },
     );
 
     final signUpButton = ButtonTheme(
@@ -68,7 +103,9 @@ class _SignUpPageState extends State<SignUpPage> {
         child:  RaisedButton(
           color: Colors.lightBlue,
           onPressed: () { 
-            Navigator.of(context).pushNamed(LogInPage.route); 
+            if (_formKey.currentState.validate()) {
+              Navigator.of(context).pushNamed(LogInPage.route); 
+            }
           },
           child: Text(
             "Register", 
