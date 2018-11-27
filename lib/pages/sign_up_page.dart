@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
+import 'package:authenticate_me/model/User.dart';
 import 'package:authenticate_me/pages/log_in_page.dart';
+import 'package:authenticate_me/db/database.dart';
 
 class SignUpPage extends StatefulWidget {
   static final route = "sign-up-page";
@@ -11,13 +14,59 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
+
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-      _passwordController.dispose();
-      super.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  String _validateUsername(String username) {
+    if (username.isEmpty) {
+      return 'Username is required.';
+    } 
+
+    return null;  
+  }
+
+  String _validateEmail(String email) {
+    if (email.isEmpty) {
+      return 'Email is required.';
     }
+
+    RegExp regex = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+    if (!regex.hasMatch(email)) {
+      return 'Incorrect email. Please try again.';
+    }
+
+    return null;
+  }
+
+  String _validatePassword(String password) {
+    if (password.isEmpty) {
+      return 'Password is required.';
+    } else if (password.length < 8) {
+      return 'Password should contains more 7 symbols.';
+    } 
+
+    return null;    
+  }
+
+  String _validateConfirmPassword(String password) {
+    if (password.isEmpty) {
+      return 'Confirm password is required.';
+    } else if (password != _passwordController.text) {
+      return 'Confirm password not equals password.';
+    } 
+
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +77,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
     final userName = TextFormField(
       autofocus: false,
-      validator: (value) {
-        if (value.isEmpty) return 'Username is required.';
-      },
+      controller: _usernameController,
+      validator: _validateUsername,
       decoration: InputDecoration(
         hintText: "User Name",
         contentPadding: EdgeInsets.all(16.0),
@@ -41,16 +89,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final email = TextFormField(
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Email is required.';
-        }
-
-        RegExp regex = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-        if (!regex.hasMatch(value)) {
-          return 'Incorrect email. Please try again.';
-        }
-      },
+      controller: _emailController,
+      validator: _validateEmail,
       decoration: InputDecoration(
         hintText: "Email",
         contentPadding: EdgeInsets.all(16.0),
@@ -68,13 +108,7 @@ class _SignUpPageState extends State<SignUpPage> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
       controller: _passwordController,
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Password is required.';
-        } else if (value.length < 8) {
-          return 'Password should contains more 7 symbols.';
-        }
-      },
+      validator: _validatePassword,
     );
 
     final confirmPassword = TextFormField(
@@ -86,13 +120,7 @@ class _SignUpPageState extends State<SignUpPage> {
         contentPadding: EdgeInsets.all(16.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Confirm password is required.';
-        } else if (value != _passwordController.text) {
-          return 'Confirm password not equals password.';
-        }
-      },
+      validator: _validateConfirmPassword,
     );
 
     final signUpButton = ButtonTheme(
@@ -102,11 +130,7 @@ class _SignUpPageState extends State<SignUpPage> {
         constraints: const BoxConstraints(minWidth: double.infinity),
         child:  RaisedButton(
           color: Colors.lightBlue,
-          onPressed: () { 
-            if (_formKey.currentState.validate()) {
-              Navigator.of(context).pushNamed(LogInPage.route); 
-            }
-          },
+          onPressed: _onRegisterButtonPressed,
           child: Text(
             "Register", 
             style: TextStyle(color: Colors.white, fontSize: 16.0)
@@ -148,5 +172,18 @@ class _SignUpPageState extends State<SignUpPage> {
         child: form,
       ),
     );
+  }
+
+  void _onRegisterButtonPressed() async {
+    if (_formKey.currentState.validate()) {
+      var db = DatabaseHelper();
+      var user = User(
+        _usernameController.text,
+        _emailController.text,
+        _passwordController.text
+      );
+
+      await db.saveUser(user);
+    }
   }
 }
