@@ -18,7 +18,7 @@ class DatabaseHelper {
 
   static Database _db;
   // super user that has more feature
-  static User _admin = User(0, "admin", "admin", "admin");
+  static User _admin = User("admin", "admin", "admin");
 
   DatabaseHelper._internal();
 

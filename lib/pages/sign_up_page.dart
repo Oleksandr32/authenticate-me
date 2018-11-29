@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+import 'package:password/password.dart';
+
 import 'package:authenticate_me/model/User.dart';
 import 'package:authenticate_me/pages/log_in_page.dart';
 import 'package:authenticate_me/db/database.dart';
@@ -179,7 +181,7 @@ class _SignUpPageState extends State<SignUpPage> {
       var db = DatabaseHelper();
       var user = User(
         _usernameController.text,
-        _emailController.text,
+        Password.hash(_emailController.text, PBKDF2()),
         _passwordController.text
       );
 
