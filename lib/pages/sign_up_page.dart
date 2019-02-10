@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:password/password.dart';
@@ -132,7 +131,12 @@ class _SignUpPageState extends State<SignUpPage> {
         constraints: const BoxConstraints(minWidth: double.infinity),
         child:  RaisedButton(
           color: Colors.lightBlue,
-          onPressed: _onRegisterButtonPressed,
+          onPressed: () async {
+            if (_formKey.currentState.validate()) {
+              await _onRegisterButtonPressed();
+              Navigator.of(context).pushNamed(LogInPage.route);
+            }
+          },
           child: Text(
             "Register", 
             style: TextStyle(color: Colors.white, fontSize: 16.0)
@@ -176,16 +180,13 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  void _onRegisterButtonPressed() async {
-    if (_formKey.currentState.validate()) {
-      var db = DatabaseHelper();
-      var user = User(
-        _usernameController.text,
-        Password.hash(_emailController.text, PBKDF2()),
-        _passwordController.text
-      );
-
-      await db.saveUser(user);
-    }
+  Future<void> _onRegisterButtonPressed() async {
+    var db = DatabaseHelper();
+    var user = User(
+      _usernameController.text,
+      _emailController.text,
+      Password.hash(_passwordController.text, PBKDF2()),
+    );
+    await db.saveUser(user);
   }
 }
