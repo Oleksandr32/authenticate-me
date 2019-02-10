@@ -36,4 +36,9 @@ class User {
     this._email = map['email'];
     this._password = map['password'];
   }
+
+  @override
+    String toString() {
+      return "username: $username\nemail: $email\npassword: $password";
+    }
 }
